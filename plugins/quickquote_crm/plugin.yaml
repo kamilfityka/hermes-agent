@@ -1,0 +1,31 @@
+name: quickquote_crm
+version: 0.1.0
+description: >
+  Integracja Hermesa z QuickQuote Pro (CRM + katalog produktów).
+provides_tools:
+  - crm_search_clients
+  - crm_get_client
+  - crm_create_client
+  - crm_create_contact
+  - crm_search_offers
+  - crm_get_offer
+  - crm_create_offer
+  - crm_update_offer
+  - crm_close_offer
+  - crm_reopen_offer
+  - crm_add_comment
+  - crm_send_offer_email
+  - crm_pipeline_stats
+  - catalog_search_skus
+  - catalog_get_sku
+  - catalog_list_products
+  - catalog_set_sku_quantity
+  - catalog_add_sku
+requires_env:
+  - name: CRM_API_BASE_URL
+    description: "Bazowy URL API QuickQuote Pro z prefiksem, np. https://api-oferty.homeda.pl/api"
+  - name: CRM_EMAIL
+    description: "Email konta serwisowego CRM dla Hermesa"
+  - name: CRM_PASSWORD
+    description: "Hasło konta serwisowego CRM"
+    secret: true
