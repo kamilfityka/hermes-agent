@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-from typing import Any
 
 from .client import CrmClient, CrmError
 
@@ -91,7 +90,10 @@ def crm_create_offer(args, **_):
         offer = _client.request("POST", "/offers", json_body=payload)
     except CrmError as exc:
         return _err(str(exc))
-    offer_iri = _client.iri("offers", _client.id_from_iri(offer.get("id")))
+    # API Platform POST responses carry both "@id" (IRI) and "id" (uuid);
+    # prefer the IRI and fall back to id so offer-item creation never silently
+    # no-ops on a response shape that omits the bare "id".
+    offer_iri = _client.iri("offers", offer.get("@id") or offer.get("id"))
     created_items, item_errors = [], []
     for raw in args.get("items") or []:
         item_payload = _compact({"offer": offer_iri, "productName": raw.get("product_name"),
@@ -124,14 +126,14 @@ def crm_close_offer(args, **_):
         return _err("Wymagane: 'id' oraz 'result' = 'won' lub 'lost'.")
     payload = _compact({"result": result, "reason": args.get("reason"),
                         "lossReasonId": _client.id_from_iri(args.get("loss_reason_id"))})
-    return _call("POST", f"/api/offers/{identifier}/close", json_body=payload)
+    return _call("POST", f"/offers/{identifier}/close", json_body=payload)
 
 
 def crm_reopen_offer(args, **_):
     identifier = _client.id_from_iri(args.get("id"))
     if not identifier:
         return _err("Pole 'id' jest wymagane.")
-    return _call("POST", f"/api/offers/{identifier}/reopen")
+    return _call("POST", f"/offers/{identifier}/reopen")
 
 
 def crm_add_comment(args, **_):
@@ -153,7 +155,7 @@ def crm_send_offer_email(args, **_):
 
 
 def crm_pipeline_stats(_args, **_):
-    return _call("GET", "/api/stats/pipeline")
+    return _call("GET", "/stats/pipeline")
 
 
 # --- catalog ---
